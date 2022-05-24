@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32414.318
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkQRCouponGenerator", "BulkQRCouponGenerator\BulkQRCouponGenerator.csproj", "{44065503-F0B2-4F99-ABCA-1FDF4460BD66}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{44065503-F0B2-4F99-ABCA-1FDF4460BD66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44065503-F0B2-4F99-ABCA-1FDF4460BD66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44065503-F0B2-4F99-ABCA-1FDF4460BD66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44065503-F0B2-4F99-ABCA-1FDF4460BD66}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B0B29A12-6EF9-4EB8-BDF7-3283A582B4D2}
+	EndGlobalSection
+EndGlobal

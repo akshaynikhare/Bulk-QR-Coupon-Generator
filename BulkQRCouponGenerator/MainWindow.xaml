@@ -1,0 +1,139 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BulkImage_app"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" x:Class="BulkImage_app.MainWindow"
+        mc:Ignorable="d"
+        Title="Bulk Image Generate" Height="617" Width="1289" MinHeight="617" MinWidth="1289">
+
+    <Grid Loaded="Grid_Loaded">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="130"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="5px"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="5px"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <TextBox x:Name="Base_image" Margin="98,5,52,0"  Text="" VerticalAlignment="Top" Height="25"/>
+        <Button Content="..." Margin="0,5,10,0" VerticalAlignment="Top" Height="25" HorizontalAlignment="Right" Width="38" Padding="5,4,5,4" Click="Button_Click"/>
+        <Label Content="Base image" Margin="10,10,0,0" RenderTransformOrigin="-0.169,-0.269" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left" Width="83"/>
+
+        <TextBox x:Name="Logo_on_QR" Margin="98,34,52,0"  Text="" VerticalAlignment="Top" Height="25"/>
+        <Button Content="..." Margin="0,34,10,0" VerticalAlignment="Top" Height="25" HorizontalAlignment="Right" Width="38" Padding="5,4,5,4" Click="Button_Click_10"/>
+        <Label Content="Logo on QR" Margin="10,39,0,0" RenderTransformOrigin="-0.169,-0.269" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left" Width="83"/>
+
+
+        <TextBox x:Name="Import_CSV" Margin="98,64,52,0" Text="" VerticalAlignment="Top" Height="25"/>
+        <Button Content="..." Margin="0,64,10,0" VerticalAlignment="Top" Height="25" HorizontalAlignment="Right" Width="38" Padding="5,4,5,4" Click="Button_Click_1"/>
+        <Label Content="Input CSV" HorizontalAlignment="Left" Margin="10,69,0,0" VerticalAlignment="Top" Width="83" Height="24"/>
+        <TextBox x:Name="Output_Dir" Margin="98,94,52,0" Text="" VerticalAlignment="Top" Height="25"/>
+        <Button Content="..." Margin="0,94,10,0" VerticalAlignment="Top" Height="25" HorizontalAlignment="Right" Width="38" Padding="5,4,5,4" Click="Button_Click_2"/>
+        <Label Content="Output Folder" Margin="10,99,0,0" RenderTransformOrigin="-0.169,-0.269" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left" Width="83"/>
+
+        <Grid  Grid.Row="0" Grid.Column="2" Grid.RowSpan="4" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="50"/>
+            </Grid.RowDefinitions>
+
+            <Grid Background="{DynamicResource PrimaryHueLightBrush}" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0" >
+                <Label Content=" {Code} List "  Margin="10,10,50,10"  MinWidth="100px"/>
+                <Button  Style="{StaticResource MaterialDesignFloatingActionDarkButton}"  Margin="239,0,0,0" HorizontalAlignment="Left" Width="40" Height="40" VerticalAlignment="Center" Click="Button_Click_6">
+                    <materialDesign:PackIcon    Kind="Delete" Height="30" Width="30" Foreground="#DDFFFFFF" />
+                </Button>
+            </Grid>
+
+            <ListView x:Name="Listofcodes" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" >
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <Grid Background="{DynamicResource PrimaryHueLightBrush}" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2" >
+                <TextBox x:Name="AddItemText"  Margin="10,10,50,10"  MinWidth="100px"/>
+                <Button  Style="{StaticResource MaterialDesignFloatingActionDarkButton}" Click="Button_Click_5" Margin="0,0,5,5" HorizontalAlignment="Right" Width="40" Height="40" VerticalAlignment="Bottom">
+                    <materialDesign:PackIcon    Kind="Plus" Height="30" Width="30" Foreground="#DDFFFFFF" />
+                </Button>
+             
+            </Grid>
+
+        </Grid>
+
+
+
+        <GridSplitter Background="{DynamicResource MaterialDesignBody}" Margin="1,50,1,50" Grid.Row="0" Grid.Column="1" Grid.RowSpan="4" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" />
+        <GridSplitter Background="{DynamicResource MaterialDesignBody}" Margin="1,50,1,50" Grid.Row="0" Grid.Column="3" Grid.RowSpan="4" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" />
+        <Border BorderBrush="{DynamicResource MaterialDesignDarkSeparatorBackground}" BorderThickness="0" Grid.Row="0" Grid.Column="4" Grid.RowSpan="4" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" >
+            <Image x:Name="PreviewBox" Grid.Column="4" HorizontalAlignment="Stretch" Margin="0,0,0,0"  />
+        </Border>
+        <GroupBox Header="Qr Code" Margin="5,5,5,5" Grid.Row="1">
+            <StackPanel HorizontalAlignment="Stretch" Margin="0,0,0,0">
+                <StackPanel Orientation="Horizontal" >
+                    <Label Content="Position " Margin="0,0,20,0"/>
+                    <Label Content="X: " />
+                    <TextBox x:Name="QR_Pos_X" Text="445" Margin="0,0,20,0" />
+                    <Label Content="y: "/>
+                    <TextBox x:Name="QR_Pos_Y"  Text="590" Margin="0,0,20,0" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" >
+                    <Label Content="Size " Margin="0,0,20,0"/>
+                    <Label Content="X: " />
+                    <TextBox  x:Name="QR_Size_X"  Text="530" Margin="0,0,20,0" />
+                    <Label Content="y: "/>
+                    <TextBox  x:Name="QR_Size_Y"  Text="530" Margin="0,0,20,0" />
+                    <Label Content="Colour: "/>
+                    <TextBox  x:Name="QR_Colour"  Text="#073147" Margin="0,0,20,0"  MinWidth="100px"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0" >
+                    <Label Content="Qr web Link " Margin="0,0,20,0"/>
+                    <TextBox x:Name="QR_Link" Text="https://www.google.com/search?q={code}" Margin="0,0,20,0" MinWidth="300px" Width="450"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="For Text Overlay" Margin="5,5,5,5" Grid.Row="2"  >
+            <StackPanel HorizontalAlignment="Stretch" Margin="0,0,0,0">
+                <StackPanel Orientation="Horizontal" >
+                    <Label Content="Position " Margin="0,0,20,0"/>
+                    <Label Content="X: " />
+                    <TextBox x:Name="TXT_Pos_X" Text="220" Margin="0,0,20,0" />
+                    <Label Content="y: "/>
+                    <TextBox x:Name="TXT_Pos_Y"  Text="1890" Margin="0,0,20,0" />
+
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" >
+                    <Label Content="Font Size: "/>
+                    <TextBox  x:Name="TXT_ForntSize"  Text="55" Margin="0,0,20,0"  MinWidth="100px"/>
+                    <Label Content="Colour: "/>
+                    <TextBox  x:Name="TXT_Colour"  Text="#073147" Margin="0,0,20,0"  MinWidth="100px"/>
+                    <Label Content="Font: "/>
+                    <ComboBox  x:Name="TXT_Font" Margin="0,0,20,0"  MinWidth="100px">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="2,10,0,0" >
+                    <Label Content="Text " Margin="0,0,20,0"/>
+                    <TextBox x:Name="TXT_Overlay" Text="send {code} to 11111-22222" Margin="0,0,20,0" MinWidth="300px" Width="487" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <Button Content="Bulk Generate" Margin="0,10,2,8" Grid.Row="3" HorizontalAlignment="Right" Width="172" Click="Button_Click_4"/>
+        <Button Content="Preview"   Style="{StaticResource MaterialDesignPaperDarkButton}" Margin="0,10,179,8" Grid.Row="3" Click="Button_Click_3" HorizontalAlignment="Right" Width="84"/>
+
+
+    </Grid>
+</Window>
