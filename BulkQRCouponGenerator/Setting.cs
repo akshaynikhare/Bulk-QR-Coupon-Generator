@@ -96,6 +96,14 @@ namespace BulkImage_app
 		public string Value { get; set; }
 	}
 
+	[XmlRoot(ElementName = "TXT_ForntSize")]
+	public class TXTForntSize
+	{
+
+		[XmlAttribute(AttributeName = "value")]
+		public string Value { get; set; }
+	}
+
 	[XmlRoot(ElementName = "TXT_Overlay")]
 	public class TXTOverlay
 	{
@@ -137,6 +145,9 @@ namespace BulkImage_app
 
 		[XmlElement(ElementName = "TXT_Font")]
 		public TXTFont TXTFont { get; set; }
+
+		[XmlElement(ElementName = "TXT_ForntSize")]
+		public TXTForntSize TXTForntSize { get; set; }
 
 		[XmlElement(ElementName = "TXT_Overlay")]
 		public TXTOverlay TXTOverlay { get; set; }

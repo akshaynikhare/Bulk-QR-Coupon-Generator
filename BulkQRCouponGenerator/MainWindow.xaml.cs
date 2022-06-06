@@ -244,8 +244,10 @@ namespace BulkImage_app
 
                     TXT_Pos_X.Text = setting.TXTPosX != null ? setting.TXTPosX.Value : TXT_Pos_X.Text;
                     TXT_Pos_Y.Text = setting.TXTPosY != null ? setting.TXTPosY.Value : TXT_Pos_Y.Text;
-                 
+
+                    
                     TXT_Colour.Text = setting.TXTColour != null ? setting.TXTColour.Value : TXT_Colour.Text;
+                    TXT_ForntSize.Text = setting.TXTForntSize != null ? setting.TXTForntSize.Value : TXT_ForntSize.Text;
                     TXT_Overlay.Text = setting.TXTOverlay != null ? setting.TXTOverlay.Value : TXT_Overlay.Text;
 
                     counter = 0;
@@ -411,7 +413,8 @@ namespace BulkImage_app
                   "<TXT_Pos_Y value=\""+ TXT_Pos_Y.Text + "\"/> " +
                   "<TXT_Colour value=\""+ TXT_Colour.Text + "\"/> " +
                   "<TXT_Font value=\""+ currentfont.Name+ "\"/> " +
-                  "<TXT_Overlay value=\""+ TXT_Overlay.Text + "\"/> " +
+                  "<TXT_ForntSize value=\"" + TXT_ForntSize.Text+ "\"/> " +
+                  "<TXT_Overlay value=\"" + TXT_Overlay.Text + "\"/> " +
                 "</Setting> "
                 ))
             {
