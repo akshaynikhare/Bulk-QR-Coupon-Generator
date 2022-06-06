@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml.Serialization;
 
 namespace BulkImage_app
 {
@@ -31,7 +32,8 @@ namespace BulkImage_app
         }
 
         public List<CsvTemplate> CodeList;
-
+        public Setting setting;
+        string InputPath ;
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog of = new OpenFileDialog();
@@ -183,7 +185,7 @@ namespace BulkImage_app
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
-            string InputPath = AppDomain.CurrentDomain.BaseDirectory+"\\Input";
+            InputPath = AppDomain.CurrentDomain.BaseDirectory+"\\Input";
             if (Directory.Exists(InputPath))
             {
                 if (File.Exists(InputPath + "\\Base_image.jpg"))
@@ -214,7 +216,7 @@ namespace BulkImage_app
             }
             TXT_Font.ItemsSource = System.Drawing.FontFamily.Families.ToList();
 
-            int counter = 0;
+           int counter = 0;
            foreach(System.Drawing.FontFamily item in TXT_Font.Items)
             {
                 if (item.Name == "Calibri")
@@ -223,6 +225,43 @@ namespace BulkImage_app
                 }
                 counter++;
             }
+
+           setting = new Setting();
+
+            if (File.Exists(InputPath + "\\Setting.xml"))
+            {
+                
+                XmlSerializer serializer = new XmlSerializer(typeof(Setting));
+                using (StringReader reader = new StringReader(File.ReadAllText(InputPath + "\\Setting.xml")))
+                {
+                    setting = (Setting)serializer.Deserialize(reader);
+                    QR_Pos_X.Text = setting.QRPosX != null ? setting.QRPosX.Value : QR_Pos_X.Text;
+                    QR_Pos_Y.Text = setting.QRPosY != null ? setting.QRPosY.Value : QR_Pos_Y.Text;
+                    QR_Size_X.Text = setting.QRSizeX != null ? setting.QRSizeX.Value : QR_Size_X.Text;
+                    QR_Size_Y.Text = setting.QRSizeY != null ? setting.QRSizeY.Value : QR_Size_Y.Text;
+                    QR_Colour.Text = setting.QRColour != null ? setting.QRColour.Value : QR_Colour.Text;
+                    QR_Link.Text = setting.QRLink != null ? setting.QRLink.Value : QR_Link.Text;
+
+                    TXT_Pos_X.Text = setting.TXTPosX != null ? setting.TXTPosX.Value : TXT_Pos_X.Text;
+                    TXT_Pos_Y.Text = setting.TXTPosY != null ? setting.TXTPosY.Value : TXT_Pos_Y.Text;
+                 
+                    TXT_Colour.Text = setting.TXTColour != null ? setting.TXTColour.Value : TXT_Colour.Text;
+                    TXT_Overlay.Text = setting.TXTOverlay != null ? setting.TXTOverlay.Value : TXT_Overlay.Text;
+
+                    counter = 0;
+                    foreach (System.Drawing.FontFamily item in TXT_Font.Items)
+                    {
+                        if (item.Name == setting.TXTFont.Value)
+                        {
+                            TXT_Font.SelectedIndex = counter;
+                        }
+                        counter++;
+                    }
+                }
+            }
+
+
+           
         }
 
         private void Button_Click_4(object sender, RoutedEventArgs e)
@@ -350,6 +389,41 @@ namespace BulkImage_app
             Listofcodes.ItemsSource = null;
             Listofcodes.Items.Clear();
             CodeList.Clear();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+
+            XmlSerializer serializer = new XmlSerializer(typeof(Setting));
+
+            var  currentfont = TXT_Font.SelectedItem as System.Drawing.FontFamily;
+
+
+            using (StringReader reader = new StringReader(
+                "<Setting>" +
+                  "<QR_Pos_X value=\""+ QR_Pos_X.Text+ "\"/> " +
+                  "<QR_Pos_Y value=\""+ QR_Pos_Y.Text+ "\"/> " +
+                  "<QR_Size_X value=\""+ QR_Size_X.Text + "\"/> " +
+                  "<QR_Size_Y value=\""+ QR_Size_Y.Text + "\"/> " +
+                  "<QR_Colour value=\""+ QR_Colour.Text + "\"/> " +
+                  "<QR_Link value=\""+ QR_Link.Text + "\"/> " +
+                  "<TXT_Pos_X value=\""+ TXT_Pos_X.Text + "\"/> " +
+                  "<TXT_Pos_Y value=\""+ TXT_Pos_Y.Text + "\"/> " +
+                  "<TXT_Colour value=\""+ TXT_Colour.Text + "\"/> " +
+                  "<TXT_Font value=\""+ currentfont.Name+ "\"/> " +
+                  "<TXT_Overlay value=\""+ TXT_Overlay.Text + "\"/> " +
+                "</Setting> "
+                ))
+            {
+                setting = (Setting)serializer.Deserialize(reader);
+            }
+
+            System.Xml.Serialization.XmlSerializer writer =
+            new System.Xml.Serialization.XmlSerializer(typeof(Setting));
+            var path = InputPath + "\\Setting.xml";
+            System.IO.FileStream file = System.IO.File.Create(path);
+            writer.Serialize(file, setting);
+            file.Close();
         }
     }
 }
