@@ -1,0 +1,170 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    env:
+      Solution_Name: BulkQRCouponGenerator.sln
+      Project_Path: BulkQRCouponGenerator\BulkQRCouponGenerator.csproj
+      Configuration: Release
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get version from tag
+      id: get_version
+      shell: bash
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+
+    - name: Restore NuGet packages
+      run: nuget restore ${{ env.Solution_Name }}
+
+    - name: Build application
+      run: msbuild ${{ env.Project_Path }} /p:Configuration=${{ env.Configuration }} /p:Platform="Any CPU"
+
+    - name: Install WiX Toolset
+      run: |
+        choco install wixtoolset -y
+        echo "C:\Program Files (x86)\WiX Toolset v3.14\bin" >> $env:GITHUB_PATH
+
+    - name: Create WiX source file
+      shell: powershell
+      run: |
+        $version = "${{ steps.get_version.outputs.VERSION }}"
+        # Ensure version is in X.X.X.X format for MSI
+        $versionParts = $version.Split('.')
+        while ($versionParts.Count -lt 4) {
+          $versionParts += "0"
+        }
+        $msiVersion = $versionParts[0..3] -join '.'
+        
+        $wxsContent = @"
+        <?xml version="1.0" encoding="UTF-8"?>
+        <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+          <Product Id="*" 
+                   Name="Bulk QR Coupon Generator" 
+                   Language="1033" 
+                   Version="$msiVersion" 
+                   Manufacturer="Akshay Nikhare" 
+                   UpgradeCode="F47AC10B-58CC-4372-A567-0E02B2C3D479">
+            <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+            <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+            <MediaTemplate EmbedCab="yes" />
+            
+            <Feature Id="ProductFeature" Title="Bulk QR Coupon Generator" Level="1">
+              <ComponentGroupRef Id="ProductComponents" />
+              <ComponentGroupRef Id="InputFiles" />
+              <ComponentGroupRef Id="OutputFiles" />
+              <ComponentRef Id="ApplicationShortcut" />
+            </Feature>
+            
+            <Directory Id="TARGETDIR" Name="SourceDir">
+              <Directory Id="ProgramFilesFolder">
+                <Directory Id="INSTALLFOLDER" Name="BulkQRCouponGenerator">
+                  <Directory Id="InputFolder" Name="Input" />
+                  <Directory Id="OutputFolder" Name="Output" />
+                </Directory>
+              </Directory>
+              <Directory Id="ProgramMenuFolder">
+                <Directory Id="ApplicationProgramsFolder" Name="Bulk QR Coupon Generator" />
+              </Directory>
+            </Directory>
+            
+            <DirectoryRef Id="ApplicationProgramsFolder">
+              <Component Id="ApplicationShortcut" Guid="*">
+                <Shortcut Id="ApplicationStartMenuShortcut"
+                          Name="Bulk QR Coupon Generator"
+                          Description="Generate bulk QR code coupons"
+                          Target="[INSTALLFOLDER]BulkQRCouponGenerator.exe"
+                          WorkingDirectory="INSTALLFOLDER" />
+                <RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall" />
+                <RegistryValue Root="HKCU" Key="Software\BulkQRCouponGenerator" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+              </Component>
+            </DirectoryRef>
+          </Product>
+          
+          <Fragment>
+            <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+              <Component Id="MainExecutable" Guid="*">
+                <File Id="BulkQRCouponGeneratorExe" Source="BulkQRCouponGenerator\bin\Release\BulkQRCouponGenerator.exe" KeyPath="yes" />
+              </Component>
+              <Component Id="AppConfig" Guid="*">
+                <File Id="AppConfig" Source="BulkQRCouponGenerator\bin\Release\BulkQRCouponGenerator.exe.config" KeyPath="yes" />
+              </Component>
+              <Component Id="MaterialDesignColors" Guid="*">
+                <File Id="MaterialDesignColorsDll" Source="BulkQRCouponGenerator\bin\Release\MaterialDesignColors.dll" KeyPath="yes" />
+              </Component>
+              <Component Id="MaterialDesignThemes" Guid="*">
+                <File Id="MaterialDesignThemesDll" Source="BulkQRCouponGenerator\bin\Release\MaterialDesignThemes.Wpf.dll" KeyPath="yes" />
+              </Component>
+              <Component Id="OokiiDialogs" Guid="*">
+                <File Id="OokiiDialogsDll" Source="BulkQRCouponGenerator\bin\Release\Ookii.Dialogs.Wpf.dll" KeyPath="yes" />
+              </Component>
+              <Component Id="QRCoder" Guid="*">
+                <File Id="QRCoderDll" Source="BulkQRCouponGenerator\bin\Release\QRCoder.dll" KeyPath="yes" />
+              </Component>
+            </ComponentGroup>
+          </Fragment>
+          
+          <Fragment>
+            <ComponentGroup Id="InputFiles" Directory="InputFolder">
+              <Component Id="BaseImage" Guid="*">
+                <File Id="BaseImageJpg" Source="BulkQRCouponGenerator\bin\Release\Input\Base_image.jpg" KeyPath="yes" />
+              </Component>
+              <Component Id="LogoOnQR" Guid="*">
+                <File Id="LogoOnQRPng" Source="BulkQRCouponGenerator\bin\Release\Input\Logo_on_QR.png" KeyPath="yes" />
+              </Component>
+              <Component Id="ImportCode" Guid="*">
+                <File Id="ImportCodeCsv" Source="BulkQRCouponGenerator\bin\Release\Input\Import_Code.csv" KeyPath="yes" />
+              </Component>
+            </ComponentGroup>
+          </Fragment>
+          
+          <Fragment>
+            <ComponentGroup Id="OutputFiles" Directory="OutputFolder">
+              <Component Id="OutputTxt" Guid="*">
+                <File Id="OutTxt" Source="BulkQRCouponGenerator\bin\Release\Output\out.txt" KeyPath="yes" />
+              </Component>
+            </ComponentGroup>
+          </Fragment>
+        </Wix>
+        "@
+        
+        $wxsContent | Out-File -FilePath "installer.wxs" -Encoding UTF8
+
+    - name: Build MSI installer
+      shell: cmd
+      run: |
+        "C:\Program Files (x86)\WiX Toolset v3.14\bin\candle.exe" installer.wxs -o installer.wixobj
+        "C:\Program Files (x86)\WiX Toolset v3.14\bin\light.exe" installer.wixobj -o BulkQRCouponGenerator.msi -ext WixUIExtension
+
+    - name: Create release artifacts folder
+      run: |
+        mkdir release-artifacts
+        copy BulkQRCouponGenerator\bin\Release\BulkQRCouponGenerator.exe release-artifacts\
+        copy BulkQRCouponGenerator.msi release-artifacts\
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          release-artifacts/BulkQRCouponGenerator.exe
+          release-artifacts/BulkQRCouponGenerator.msi
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
