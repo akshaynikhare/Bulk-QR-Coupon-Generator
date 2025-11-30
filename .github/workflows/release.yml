@@ -8,6 +8,8 @@ on:
 jobs:
   build-and-release:
     runs-on: windows-latest
+    permissions:
+      contents: write
 
     env:
       Solution_Name: BulkQRCouponGenerator.sln
@@ -38,9 +40,17 @@ jobs:
       run: msbuild ${{ env.Project_Path }} /p:Configuration=${{ env.Configuration }} /p:Platform="Any CPU"
 
     - name: Install WiX Toolset
+      shell: powershell
       run: |
         choco install wixtoolset -y
-        echo "C:\Program Files (x86)\WiX Toolset v3.14\bin" >> $env:GITHUB_PATH
+        # Find the installed WiX Toolset bin directory dynamically
+        $wixPath = Get-ChildItem "C:\Program Files (x86)\WiX Toolset*\bin" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+        if ($wixPath) {
+          echo $wixPath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        } else {
+          Write-Error "WiX Toolset not found"
+          exit 1
+        }
 
     - name: Create WiX source file
       shell: powershell
@@ -69,7 +79,7 @@ jobs:
             <Feature Id="ProductFeature" Title="Bulk QR Coupon Generator" Level="1">
               <ComponentGroupRef Id="ProductComponents" />
               <ComponentGroupRef Id="InputFiles" />
-              <ComponentGroupRef Id="OutputFiles" />
+              <ComponentRef Id="OutputFolderComp" />
               <ComponentRef Id="ApplicationShortcut" />
             </Feature>
             
@@ -77,7 +87,11 @@ jobs:
               <Directory Id="ProgramFilesFolder">
                 <Directory Id="INSTALLFOLDER" Name="BulkQRCouponGenerator">
                   <Directory Id="InputFolder" Name="Input" />
-                  <Directory Id="OutputFolder" Name="Output" />
+                  <Directory Id="OutputFolder" Name="Output">
+                    <Component Id="OutputFolderComp" Guid="*">
+                      <CreateFolder />
+                    </Component>
+                  </Directory>
                 </Directory>
               </Directory>
               <Directory Id="ProgramMenuFolder">
@@ -134,14 +148,6 @@ jobs:
               </Component>
             </ComponentGroup>
           </Fragment>
-          
-          <Fragment>
-            <ComponentGroup Id="OutputFiles" Directory="OutputFolder">
-              <Component Id="OutputTxt" Guid="*">
-                <File Id="OutTxt" Source="BulkQRCouponGenerator\bin\Release\Output\out.txt" KeyPath="yes" />
-              </Component>
-            </ComponentGroup>
-          </Fragment>
         </Wix>
         "@
         
@@ -150,8 +156,8 @@ jobs:
     - name: Build MSI installer
       shell: cmd
       run: |
-        "C:\Program Files (x86)\WiX Toolset v3.14\bin\candle.exe" installer.wxs -o installer.wixobj
-        "C:\Program Files (x86)\WiX Toolset v3.14\bin\light.exe" installer.wixobj -o BulkQRCouponGenerator.msi -ext WixUIExtension
+        candle.exe installer.wxs -o installer.wixobj
+        light.exe installer.wixobj -o BulkQRCouponGenerator.msi -ext WixUIExtension
 
     - name: Create release artifacts folder
       run: |
